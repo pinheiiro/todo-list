@@ -1,8 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { useSession } from "next-auth/react";
+import Tasks from './database/schema/tasks';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const { data: session, status } = useSession();
-    console.log(session);
-    res.status(200).json({name: "Gabriel Pinheiro"});
+    const { task } = req.body;
+    const newTask = new Tasks({ task: task })
+    const doc = await newTask.save();
+    res.json(doc);
 }

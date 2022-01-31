@@ -5,7 +5,6 @@ export const Post: NextComponentType = () => {
   return (
       <div>
             <h1>Página posts</h1>
-            <button onClick={() => signOut()}>Sign out</button>
       </div>
   )
 }
