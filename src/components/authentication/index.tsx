@@ -16,10 +16,17 @@ export const Main: NextComponentType = () => {
     
     const { data: session } = useSession();
 
+    useEffect(() => {
+        if(session) {
+            router.push('/posts');
+        }
+    }, [session]);
+
+    /*
     if(session) {
         router.push('/posts');
     }
-
+    */
     return (
         <>
             Not signed in <br />

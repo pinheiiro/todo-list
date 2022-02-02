@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import Tasks from './database/schema/tasks';
+import Tasks from './database/models/tasks';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { task } = req.body;

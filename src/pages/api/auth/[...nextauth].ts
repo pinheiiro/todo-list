@@ -1,16 +1,18 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import { MongoDBAdapter } from '@next-auth/mongodb-adapter';
-import clientPromise from '../database/connection';
-import '../database/connect';
+//import clientPromise from '../database/connection';
+import { clientPromise, db } from '../database/client';
+import { signIn } from 'next-auth/react';
+//import '../database/connect';
 //import User from '../database/schema/user';
 
 export default NextAuth({
     adapter: MongoDBAdapter(clientPromise),
     providers: [
         GoogleProvider({
-            clientId: "923920710129-j5vfag9aejb07ip7af05o31r9gbd174f.apps.googleusercontent.com",
-            clientSecret: "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",
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         })
     ],
     /*

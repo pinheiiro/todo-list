@@ -1,7 +1,8 @@
 import { NextComponentType } from "next";
 import { useState, useEffect } from "react";
+import { api } from "../../../services/api";
 
-export const List: NextComponentType = () => {
+export const List: NextComponentType = ({user}) => {
 
     const [newPost, setNewPost] = useState(false);
     const [text, setText] = useState('');
@@ -12,18 +13,30 @@ export const List: NextComponentType = () => {
         setText(value);
     }
 
-    function add() {
+    function add(event) {
+        event.preventDefault();
         /** Nesta função será realizado um POST no banco de dados 
          * através do axios com api.post(conteudo) */
+        
+        api.post('/api/posts/new', {
+            task: text,
+            userId: user._id
+        }).then((res) => {
+            console.log(res)
+        })
+        /*
         setTasks([text, ...tasks]);
         setText('');
         setNewPost(false);
+        */
     }
 
     function remove(index) {
         tasks.splice(index, 1);
         return tasks
     }
+
+    //console.log(user)
 
     return (
         <main>

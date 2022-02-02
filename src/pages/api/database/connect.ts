@@ -1,8 +1,11 @@
 import mongoose from 'mongoose';
 
-//const url = process.env.MONGODB_URL
+const url = process.env.MONGODB_URI
 
-mongoose.connect("mongodb://localhost:27017/todo-list").
+    mongoose.connect(url, {
+        useUnifiedTopology: true,
+        useNewUrlParser: true
+    }).
     then(() => {
         console.log("Conectado ao MongoDB");
     }).catch((err) => {
