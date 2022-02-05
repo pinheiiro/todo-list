@@ -1,3 +1,4 @@
+import { set } from "mongoose";
 import { NextComponentType } from "next";
 import { useState, useEffect } from "react";
 import { api } from "../../../services/api";
@@ -18,11 +19,14 @@ export const List: NextComponentType = ({user}) => {
         /** Nesta função será realizado um POST no banco de dados 
          * através do axios com api.post(conteudo) */
         
-        api.post('/api/posts/new', {
+        api.post('/posts/new', {
             task: text,
             userId: user._id
         }).then((res) => {
-            console.log(res)
+            const response = res.data;
+            setTasks([response, ...tasks]);
+            setText('');
+            setNewPost(false);
         })
         /*
         setTasks([text, ...tasks]);
@@ -31,12 +35,31 @@ export const List: NextComponentType = ({user}) => {
         */
     }
 
-    function remove(index) {
-        tasks.splice(index, 1);
-        return tasks
+    function update(id) {
+        console.log(id);
+    }
+    
+    function remove(id) {
+        console.log(id)
+        api.delete(`/posts/remove/${id}`).
+            then((res) => {
+                tasks.splice(id, 1);
+                setTasks(tasks);
+            }).catch((err) => {
+                console.log(err);
+            })
     }
 
-    //console.log(user)
+    useEffect(() => {
+        api.get(`/posts/${user._id}`).
+            then((res) => {
+                const response = res.data;
+                console.log(response);
+                setTasks(response);
+            }).catch((err) => {
+                console.log(err);
+            })
+    }, [])
 
     return (
         <main>
@@ -49,19 +72,20 @@ export const List: NextComponentType = ({user}) => {
             }
             <section>
                 <h2>Ativas</h2>
-                {tasks.map((task, index) => {
-                    return (
-                        <ul key={task}>
-                            <li>
+                <ul>
+                    {tasks.map((task) => {
+                        return (
+                            <li key={task._id}>
                                 <div>
                                     <input type="checkbox" name="task" id="task" />
-                                    <h3>{task}</h3>
-                                    <button onClick={() => remove(index)}>-</button>
+                                    <h3>{task.task}</h3>
+                                    <button onClick={() => update(task._id)}>Editar</button>
+                                    <button onClick={() => remove(task._id)}>-</button>
                                 </div>
                             </li>
-                        </ul>
-                    )
-                })}
+                        )
+                    })}
+                </ul>
             </section>
         </main>
     )
