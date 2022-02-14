@@ -4,7 +4,11 @@ import Tasks from '../database/models/tasks';
 
 export default async function allPosts(req: NextApiRequest, res: NextApiResponse) {
     const { userId } = req.query;
-    const findTasks = Tasks.find({userId: userId});
-    const posts = await findTasks.exec();
-    res.json(posts);
+    try {
+        const findTasks = Tasks.find({userId: userId});
+        const posts = await findTasks.exec();
+        res.status(200).json(posts);
+    } catch(err) {
+        res.status(500).json({error: err});
+    }
 }
