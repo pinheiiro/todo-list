@@ -2,14 +2,23 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import { getSession } from 'next-auth/react';
 import { clientPromise, db } from "./api/database/client";
-//import Tasks from './api/database/schema/tasks';
+import { api } from "../services/api";
 
-import { Post } from '../components/posts';
 import { Header } from '../components/posts/header';
-import { List } from '../components/posts/list/';
+import { List } from '../components/posts/list';
+import { useQuery } from 'react-query';
 
 const Posts: NextPage = ({user}) => {
-    //console.log(user);
+
+    const { isLoading, isSuccess, isError, data } = useQuery('tasks', async () => {
+        try {
+            const { data } = await api.get(`/posts/${user._id}`);
+            return data;
+        } catch(err) {
+            return err;
+        }
+    });
+
     return (
         <div>
             <Head>
@@ -18,8 +27,23 @@ const Posts: NextPage = ({user}) => {
                 <link rel="icon" href="" />
             </Head>
             <Header user={user}/>
-            <Post/>
-            <List user={user}/>
+            <h1>Página Posts</h1>
+
+            <main>
+                { isLoading && 
+                    <div>
+                        <h1>Carregando</h1>
+                    </div>    
+                }
+                { isError && 
+                    <div>
+                        <h1>Não foi possivel carregar as informações</h1>
+                    </div>
+                }
+                { isSuccess &&
+                    <List user={user} data={data}/>
+                }
+            </main>
         </div>
     )
 }
@@ -40,11 +64,6 @@ export async function getServerSideProps({ req }) {
         }
         clientPromise
         const findUser = await db.collection("users").findOne({email: session.user.email})
-        /*
-        const id = user?._id;
-        const tasks = await db.collection("tasks").find({_id: id});
-        console.log(tasks);
-        */
         const convert = JSON.stringify(findUser);
         const user = JSON.parse(convert);
         return {
