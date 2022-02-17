@@ -1,7 +1,7 @@
 import { NextComponentType } from "next";
-import { useState, useEffect, BaseSyntheticEvent } from "react";
+import { useState, BaseSyntheticEvent } from "react";
 import { api } from "../../../services/api";
-import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 
 interface INewTask {
     text: String,
@@ -22,37 +22,15 @@ export const List: NextComponentType = ({user, data}) => {
 
     const [newPost, setNewPost] = useState <Boolean> (false);
     const [updatePost, setUpdatePost] = useState <Boolean> (false);
-    const [marked, setMarked] = useState ([]);
     const [text, setText] = useState <String> ('');
     const [updateId, setUpdateId] = useState <null | String> (null);
 
     const queryClient = useQueryClient();
-    /*
-    const { isLoading, isSuccess, isError, data } = useQuery('tasks', async () => {
-        try {
-            const { data } = await api.get(`/posts/${user._id}`);
-            return data;
-        } catch(err) {
-            return err;
-        }
-    });
-    */
     
     const createTask = useMutation(async ({text, userId}: INewTask) => {
         const res = await api.post('posts/new', {
             task: text,
             userId: userId
-        });
-        return res.data;
-    }, {
-        onSuccess: () => {
-            queryClient.invalidateQueries('tasks');
-        }
-    });
-
-    const updateTasks = useMutation(async ({taskId, newText}: IUpdateTask) => {
-        const res = await api.patch(`/posts/update/${taskId}`, {
-            text: newText
         });
         return res.data;
     }, {
@@ -77,28 +55,23 @@ export const List: NextComponentType = ({user, data}) => {
         }
     });
 
-    //console.log(data);
-
-    async function check({target}: BaseSyntheticEvent): void {
-
-        const onCheck: IOnCheck = {
-            id: target.value,
-            check: target.checked
+    const updateTasks = useMutation(async ({taskId, newText}: IUpdateTask) => {
+        await api.patch(`/posts/update/${taskId}`, {
+            text: newText
+        });
+    }, {
+        onSuccess: () => {
+            queryClient.invalidateQueries('tasks');
         }
+    });
 
-        if(onCheck.check) {
-            await checkTask.mutateAsync(onCheck);
-        } else {
-            await checkTask.mutateAsync(onCheck);
+    const removeTasks = useMutation(async (id) => {
+        await api.delete(`/posts/remove/${id}`);
+    }, {
+        onSuccess: () => {
+            queryClient.invalidateQueries('tasks');
         }
-        /*
-        if(target.checked) {
-            setMarked([...marked, target.value]);
-        } else {
-            setMarked(marked.filter((mark) => mark !== target.value));
-        }
-        */
-    }
+    })
 
     function assignment({target}: BaseSyntheticEvent): void {
         const { value } = target;
@@ -111,6 +84,15 @@ export const List: NextComponentType = ({user, data}) => {
         setNewPost(true);
     }
 
+    function cancel(state: Boolean): void {
+        if(newPost === state) {
+            setNewPost(false);
+        }
+        else if(updatePost === state) {
+            setUpdatePost(false);
+        }
+    }
+
     async function newTasks(event: BaseSyntheticEvent): Promise<void> {
         event.preventDefault();
         const newTask: INewTask = {
@@ -120,6 +102,19 @@ export const List: NextComponentType = ({user, data}) => {
         await createTask.mutateAsync(newTask);
         setText('');
         setNewPost(false);
+    }
+
+    async function check({target}: BaseSyntheticEvent): void {
+        const onCheck: IOnCheck = {
+            id: target.value,
+            check: target.checked
+        }
+
+        if(onCheck.check) {
+            await checkTask.mutateAsync(onCheck);
+        } else {
+            await checkTask.mutateAsync(onCheck);
+        }
     }
 
     function update(id, name): void {
@@ -139,36 +134,30 @@ export const List: NextComponentType = ({user, data}) => {
                 newText: text
             }
             await updateTasks.mutateAsync(updateTask);
-            setUpdatePost(false)
+            setUpdatePost(false);
         }
     }
     
     async function remove(id): Promise<void> {
-        console.log(id)
-        await api.delete(`/posts/remove/${id}`)
+        await removeTasks.mutateAsync(id);
     }
-
-    function cancel(): void {
-        setNewPost(false);
-        setUpdatePost(false);
-    }
-
-    
-    useEffect(() => {
-        console.log(marked);
-    }, [marked])
 
 
     return (
         <>
             <button onClick={add}>Add +</button>
-            { (newPost || updatePost) &&
+            { newPost &&
                 <> 
-                <form onSubmit={(newPost && newTasks) || (updatePost && edit)}>
-                    <input type="text" placeholder="Nova Tarefa" onChange={assignment} value={text}/>
-                    <input type="submit" value="+" />
-                </form>
-                <button onClick={cancel}>Cancelar</button>
+                    <form onSubmit={newTasks}>
+                        <input 
+                            type="text" 
+                            placeholder="Nova Tarefa" 
+                            onChange={assignment} 
+                            value={text}
+                        />
+                        <input type="submit" value="+" />
+                    </form>
+                    <button onClick={() => cancel(newPost)}>Cancelar</button>
                 </>
             }
             <section>
@@ -181,12 +170,25 @@ export const List: NextComponentType = ({user, data}) => {
                                     <input 
                                         type="checkbox" 
                                         value={task._id}
-                                        checked={task.completed}
-                                        //checked={marked.includes(task._id)} 
+                                        checked={task.completed} 
                                         onChange={check} 
                                     />
-                                    <h3>{task.task}</h3>
-                                    <button onClick={() => update(task._id, task.task)}>Editar</button>
+                                    { updatePost && (updateId === task._id) ?
+                                        <>
+                                            <form onSubmit={edit}>
+                                                <input type="text" onChange={assignment} value={text}/>
+                                                <input type="submit" value="+" />
+                                            </form>
+                                            <button onClick={() => cancel(updatePost)}>Cancelar</button>
+                                        </>
+                                        :
+                                        <>
+                                            <h3 className={task.completed ? 'completed' : 'active'}>
+                                                {task.task}
+                                            </h3>
+                                            <button onClick={() => update(task._id, task.task)}>Editar</button> 
+                                        </>
+                                    }
                                     <button onClick={() => remove(task._id)}>-</button>
                                 </div>
                             </li>
@@ -196,57 +198,4 @@ export const List: NextComponentType = ({user, data}) => {
             </section>
         </>
     )
-
-    /*
-    return (
-        <main>
-            { isLoading && 
-                <div>
-                    <h1>Carregando</h1>
-                </div>    
-            }
-            { isError && 
-                <div>
-                    <h1>Não foi possivel carregar as informações</h1>
-                </div>
-            }
-            { isSuccess &&
-                <>
-                <button onClick={add}>Add +</button>
-                { (newPost || updatePost) &&
-                    <> 
-                    <form onSubmit={(newPost && newTasks) || (updatePost && edit)}>
-                        <input type="text" placeholder="Nova Tarefa" onChange={assignment} value={text}/>
-                        <input type="submit" value="+" />
-                    </form>
-                    <button onClick={cancel}>Cancelar</button>
-                    </>
-                }
-                <section>
-                    <h2>Ativas</h2>
-                    <ul>
-                        {data.map((task) => {
-                            return (
-                                <li key={task._id}>
-                                    <div>
-                                        <input 
-                                            type="checkbox" 
-                                            value={task._id} 
-                                            checked={marked.includes(task._id)} 
-                                            onChange={check} 
-                                        />
-                                        <h3>{task.task}</h3>
-                                        <button onClick={() => update(task._id, task.task)}>Editar</button>
-                                        <button onClick={() => remove(task._id)}>-</button>
-                                    </div>
-                                </li>
-                            )
-                        })}
-                    </ul>
-                </section>
-                </>
-            }
-        </main>
-    )
-    */
 }
