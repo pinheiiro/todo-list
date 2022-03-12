@@ -1,18 +1,11 @@
 import { NextComponentType } from "next";
-import Link from "next/link";
-import { useSession, signIn, getSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { useEffect } from "react";
 import router from 'next/router';
 
+import { Button } from '@chakra-ui/react';
+
 export const Main: NextComponentType = () => {
-    /*
-    useEffect(() => {
-        getSession().
-            then((res) => {
-                console.log(res);
-            })
-    }, []);
-    */
     
     const { data: session } = useSession();
 
@@ -30,7 +23,7 @@ export const Main: NextComponentType = () => {
     return (
         <>
             Not signed in <br />
-            <button onClick={() => signIn("google")}>Sign in</button>
+            <Button colorScheme='whatsapp' onClick={() => signIn("google")}>Sign in</Button>
         </>
     )
 }

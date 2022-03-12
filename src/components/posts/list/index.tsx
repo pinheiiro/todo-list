@@ -3,6 +3,8 @@ import { useState, BaseSyntheticEvent } from "react";
 import { api } from "../../../services/api";
 import { useMutation, useQueryClient } from 'react-query';
 
+import { Button, Input, UnorderedList, ListItem, Flex, Checkbox, Text } from '@chakra-ui/react';
+
 interface INewTask {
     text: String,
     userId: String
@@ -145,32 +147,61 @@ export const List: NextComponentType = ({user, data}) => {
 
     return (
         <>
-            <button onClick={add}>Add +</button>
+            <Button 
+                size='sm'
+                colorScheme='teal' 
+                onClick={add}
+            >
+                Add +
+            </Button>
             { newPost &&
                 <> 
                     <form onSubmit={newTasks}>
-                        <input 
-                            type="text" 
-                            placeholder="Nova Tarefa" 
-                            onChange={assignment} 
+                        <Input
+                            size='md'
+                            colorScheme='blue'
+                            width='20%'
+                            type="text"
+                            autoFocus
+                            placeholder="Nova Tarefa"
+                            required
+                            onChange={assignment}
                             value={text}
                         />
-                        <input type="submit" value="+" />
+                        <Button
+                            size='md'
+                            mb='1'
+                            colorScheme='blue'
+                            fontWeight='bold'
+                            type="submit"
+                            >
+                                +
+                        </Button>
                     </form>
-                    <button onClick={() => cancel(newPost)}>Cancelar</button>
+                    <Button
+                        colorScheme='whiteAlpha'
+                        color='gray.600'
+                        _hover={{bg: 'gray.500', color: 'white'}}
+                        onClick={() => cancel(newPost)}
+                    >
+                        Cancelar
+                    </Button>
                 </>
             }
             <section>
                 <h2>Ativas</h2>
-                <ul>
+                <UnorderedList spacing='5' styleType='none'>
                     {data.map((task) => {
                         return (
-                            <li key={task._id}>
-                                <div>
-                                    <input 
+                            <ListItem key={task._id}>
+                                <Flex alignItems='center' bg='gray.600' px='2' py='1'>
+                                    <Checkbox
+                                        mx='4'
+                                        size='lg'
+                                        colorScheme='whatsapp'
                                         type="checkbox" 
                                         value={task._id}
-                                        checked={task.completed} 
+                                        isChecked={task.completed} 
                                         onChange={check} 
                                     />
                                     { updatePost && (updateId === task._id) ?
@@ -183,18 +214,34 @@ export const List: NextComponentType = ({user, data}) => {
                                         </>
                                         :
                                         <>
-                                            <h3 className={task.completed ? 'completed' : 'active'}>
+                                            <Text
+                                                color={task.completed ? 'whiteAlpha.700' : 'white'}
+                                                textDecoration={task.completed ? 'line-through' : 'none'}
+                                            >
                                                 {task.task}
-                                            </h3>
-                                            <button onClick={() => update(task._id, task.task)}>Editar</button> 
+                                            </Text>
+                                            <Button
+                                                size='sm'
+                                                colorScheme='whiteAlpha'
+                                                mx='3'
+                                                onClick={() => update(task._id, task.task)}
+                                            >
+                                                Editar
+                                            </Button> 
                                         </>
                                     }
-                                    <button onClick={() => remove(task._id)}>-</button>
-                                </div>
-                            </li>
+                                    <Button
+                                        size='sm'
+                                        colorScheme='red'
+                                        onClick={() => remove(task._id)}
+                                    >
+                                        -
+                                    </Button>
+                                </Flex>
+                            </ListItem>
                         )
                     })}
-                </ul>
+                </UnorderedList>
             </section>
         </>
     )

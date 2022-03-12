@@ -1,6 +1,6 @@
 import { MongoClient } from 'mongodb'
 
-let uri = process.env.MONGODB_URI || "" // trick ts :(
+let uri = process.env.MONGODB_URI || ""
 let dbName = process.env.MONGODB_DB
 
 const options = {
