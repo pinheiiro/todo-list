@@ -1,11 +1,12 @@
 import { NextComponentType } from "next";
 import { signOut } from "next-auth/react";
 
-import { Button, Avatar, Text, HStack, Flex, Spacer } from '@chakra-ui/react';
+import { Button, Avatar, Text, HStack, Flex, Spacer, Box } from '@chakra-ui/react';
 
 export const Header: NextComponentType = ({user}) => {
     return (
-        <Flex px='4' py='2' bg='gray.700' boxShadow='base' align='center'>
+        <Box bg='gray.700' px='4' py='2' boxShadow='base'>
+        <Flex m='0 auto' maxW='1366px' align='center'>
             <HStack>
                 <Avatar 
                     border='2px double white'
@@ -14,7 +15,7 @@ export const Header: NextComponentType = ({user}) => {
                 />
                 <Text 
                     fontWeight='bold' 
-                    color='white' 
+                    color='white'
                     fontSize='lg'
                 >
                     {user.name}
@@ -23,5 +24,6 @@ export const Header: NextComponentType = ({user}) => {
             <Spacer/>
             <Button colorScheme='orange' onClick={() => signOut()}>Sair</Button>
         </Flex>
+        </Box>
     )
 }

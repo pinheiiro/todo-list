@@ -3,7 +3,7 @@ import { useState, BaseSyntheticEvent } from "react";
 import { api } from "../../../services/api";
 import { useMutation, useQueryClient } from 'react-query';
 
-import { Button, Input, UnorderedList, ListItem, Flex, Checkbox, Text } from '@chakra-ui/react';
+import { Button, Input, UnorderedList, ListItem, Flex, Checkbox, Text, Box } from '@chakra-ui/react';
 
 interface INewTask {
     text: String,
@@ -146,37 +146,41 @@ export const List: NextComponentType = ({user, data}) => {
 
 
     return (
-        <>
-            <Button 
+        <>  
+            <Flex flexDir='column' justify='center' align='center'>
+            <Button
                 size='sm'
-                colorScheme='teal' 
+                mb='3'
+                colorScheme='teal'
                 onClick={add}
             >
                 Add +
             </Button>
             { newPost &&
-                <> 
+                <Flex>
                     <form onSubmit={newTasks}>
-                        <Input
-                            size='md'
-                            colorScheme='blue'
-                            width='20%'
-                            type="text"
-                            autoFocus
-                            placeholder="Nova Tarefa"
-                            required
-                            onChange={assignment}
-                            value={text}
-                        />
-                        <Button
-                            size='md'
-                            mb='1'
-                            colorScheme='blue'
-                            fontWeight='bold'
-                            type="submit"
-                            >
-                                +
-                        </Button>
+                        <Flex>
+                            <Input
+                                size='md'
+                                type="text"
+                                variant='filled'
+                                borderColor='blue.400'
+                                autoFocus
+                                placeholder="Nova Tarefa"
+                                required
+                                onChange={assignment}
+                                value={text}
+                            />
+                            <Button
+                                size='md'
+                                mb='1'
+                                colorScheme='blue'
+                                fontWeight='bold'
+                                type="submit"
+                                >
+                                    +
+                            </Button>
+                        </Flex>
                     </form>
                     <Button
                         colorScheme='whiteAlpha'
@@ -186,20 +190,21 @@ export const List: NextComponentType = ({user, data}) => {
                     >
                         Cancelar
                     </Button>
-                </>
+                </Flex>
             }
+            </Flex>
             <section>
                 <h2>Ativas</h2>
-                <UnorderedList spacing='5' styleType='none'>
+                <UnorderedList m='0' spacing='5' styleType='none'>
                     {data.map((task) => {
                         return (
                             <ListItem key={task._id}>
-                                <Flex alignItems='center' bg='gray.600' px='2' py='1'>
+                                <Flex alignItems='center' bg='gray.600' px='1' py='1.5' borderRadius='7'>
                                     <Checkbox
                                         mx='4'
                                         size='lg'
                                         colorScheme='whatsapp'
-                                        type="checkbox" 
+                                        type="checkbox"
                                         value={task._id}
                                         isChecked={task.completed} 
                                         onChange={check} 
