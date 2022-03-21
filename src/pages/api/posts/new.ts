@@ -3,14 +3,25 @@ import  '../database/connect';
 import Tasks from '../database/models/tasks';
 
 export default async function newPost(req: NextApiRequest, res: NextApiResponse) {
-    const { task, userId } = req.body;
-    if(!task || !userId) {
+    const { userId, task } = req.body;
+    if(!userId || !task) {
         res.status(404).json({erro: 'propriedade indefinida'});
     }
     try {
-        const newTask = new Tasks({ task, userId });
-        await newTask.save();
+        const newTask = await Tasks.findOneAndUpdate({
+            userId: userId
+        }, {
+            $push: {
+                tasks: {
+                    task: task
+                }
+            }
+        }, {
+            new: true
+        });
+        
         res.json(newTask);
+
     } catch(err) {
         console.log(err);
     }
